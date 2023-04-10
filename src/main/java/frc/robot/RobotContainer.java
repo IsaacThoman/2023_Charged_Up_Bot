@@ -95,7 +95,13 @@ public class RobotContainer {
 
 
     SmartDashboard.putData("Auto Chooser",autoChooser.getAutoChooser());
-      SmartDashboard.putBoolean("higherMaxOutput",false); //delete me after debugging
+
+    SmartDashboard.putNumber("webdriver_desiredX",0);
+    SmartDashboard.putNumber("webdriver_desiredY",0);
+    SmartDashboard.putNumber("webdriver_desiredAngle",0);
+    SmartDashboard.putNumber("webdriver_affX",0);
+    SmartDashboard.putNumber("webdriver_affY",0);
+    SmartDashboard.putNumber("webdriver_affRotation",0);
 
 
   }

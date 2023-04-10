@@ -31,7 +31,6 @@
 *.lib
 
 # Executables
-*.exe
 *.out
 *.app
 
@@ -162,3 +161,5 @@ bin/
 *-window.json
 
 .idea/
+
+.run/
