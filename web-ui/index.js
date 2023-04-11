@@ -4,14 +4,32 @@ const ctx = canvas.getContext("2d");
 let playerX = 0;
 let playerY = 0;
 let playerAngle = 0;
-const pixelsToMeters = 50;
-const maxSpeedMetersPerSecond = 3.5;
+let actualX = 0;
+let actualY = 0;
+let actualAngle = 0;
+const pixelsToMeters = 25;
+
+let sprinting = false;
+
+const maxSpeedMetersPerSecond = 1.5/2;
 const arrowsRadsPerSecond = 3;
+const DEFAULT_AFF_SPEED =0.30/2 ;
+const DEFAULT_AFF_ROTATION_SPEED = 4;
+
+const sprintMaxSpeedMetersPerSecond = 1.5 * 2;
+const sprintArrowsRadsPerSecond = 3;
+const SPRINT_AFF_SPEED = 0.30* 1.5;
+const SPRINT_AFF_ROTATION_SPEED = 4.25 ;
+
+const mouseSensitivity = 1/250;
+
+
 function periodic(){
 
     fillSky();
     drawArrows();
     processInputs();
+    avoidTragedy();
 
     requestAnimationFrame(periodic);
 }
@@ -19,9 +37,9 @@ requestAnimationFrame(periodic);
 
 function drawArrows(){
 
-    let actualX =  NetworkTables.getValue("/SmartDashboard/webdriver_actualX",0);
-    let actualY =  NetworkTables.getValue("/SmartDashboard/webdriver_actualY",0);
-    let actualAngle =  NetworkTables.getValue("/SmartDashboard/webdriver_actualAngle",0);
+    actualX =  NetworkTables.getValue("/SmartDashboard/webdriver_actualX",0);
+    actualY =  NetworkTables.getValue("/SmartDashboard/webdriver_actualY",0);
+    actualAngle =  NetworkTables.getValue("/SmartDashboard/webdriver_actualAngle",0);
 
     drawArrow(actualX*pixelsToMeters+320/2,-actualY*pixelsToMeters+200/2,actualAngle,"#00ff00"); //desired
     drawArrow(playerX*pixelsToMeters+320/2,-playerY*pixelsToMeters+200/2,playerAngle,"#ff0000"); //desired
@@ -76,10 +94,14 @@ function processInputs(){
     if(keys['arrowleft']){angleChange += arrowsRadsPerSecond;}
     if(keys['arrowright']){angleChange -= arrowsRadsPerSecond;}
 
+    sprinting = keys['shift'];
+
     let angle = Math.atan2(ySpeed,xSpeed);
     let speed = maxSpeedMetersPerSecond;
-    let affSpeed = 0.35;
-    let affRotationSpeed = 3.5;
+
+    let affSpeed = DEFAULT_AFF_SPEED;
+    let affRotationSpeed = DEFAULT_AFF_ROTATION_SPEED;
+    if(sprinting){ speed = sprintMaxSpeedMetersPerSecond; affSpeed = SPRINT_AFF_SPEED; affRotationSpeed = SPRINT_AFF_ROTATION_SPEED;}
     if(!keyHeld){speed = 0; affSpeed = 0;}
     playerX += Math.cos(angle+playerAngle)*speed*((Date.now()-lastInputTime)/1000);
     playerY += Math.sin(angle+playerAngle)*speed*((Date.now()-lastInputTime)/1000);
@@ -98,6 +120,14 @@ function processInputs(){
 
     lastInputTime = Date.now();
 
+}
+
+function avoidTragedy(){
+    if(Math.hypot(playerX-actualX,playerY-actualY)>1){
+        playerX = actualX;
+        playerY = actualY;
+        playerAngle = actualAngle;
+    }
 }
 
 function angleDiffRad(ang1, ang2) {
@@ -132,5 +162,5 @@ function toggleUseMouse(){
         document.removeEventListener("mousemove", mouseUpdate, false);
 }
 function mouseUpdate(e){
-    playerAngle-= e.movementX/250;
+    playerAngle-= e.movementX * mouseSensitivity;
 }
